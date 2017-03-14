@@ -1,54 +1,53 @@
-import certifi
 import json
 import os
 import sys
+from PIL import Image
 
-from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search, Q
+def init(facenet_root, data_dir):
+  """
+  Initialize face detector.
+  :param facenet_root: path to facenet package
+  :param data_dir: path to data directory where onet, rnet, pnet networks weights are saved.
+  :return: initialized MTCNNFaceDetector object.
+  """
+  sys.path.append(facenet_root)
+  from src.detectors.mtcnn import MTCNNFaceDetector
+  conf = dict()
+  conf['data_dir'] = data_dir
+  mtfd = MTCNNFaceDetector(conf)
+  return mtfd
 
-
-def search(obj_parents_l, es):
-    return Search() \
-        .using(es) \
-        .filter(Q('match',
-                  obj_parent=json.dumps(obj_parents_l)))\
-        .scan()
 
 if __name__ == '__main__':
-    """
-    Returns the Elasticsearch documents whose parents are in sys.argv.
+  """
+  Returns the faces detected in the images listed in sys.argv.
+  """
 
-    This is useful for retrieving image documents given a series of
-    ad document ids.
-    """
-    config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                               'es_config.json')
-    if not os.path.isfile(config_file):
-        print 'Configuration file not found.'
-        sys.exit(1)
-    elif len(sys.argv) < 2:
-        print 'Usage: get_es_child_documents.py ad_cdr_id...'
-        sys.exit(1)
-    else:
-        with open(config_file, 'rb') as infile:
-            config = json.load(infile)
+  if len(sys.argv) < 5:
+    print 'Usage: detect_face.py facenet_root detect_data_dir image_data_dir images_sha1s...'
+    sys.exit(1)
+  else:
+    mtfd = init(facenet_root=sys.argv[1], data_dir=sys.argv[2])
 
-        es = Elasticsearch(config['url'],
-                           http_auth=(config['user'], config['password']),
-                           use_ssl=True,
-                           verify_certs=True,
-                           ca_certs=certifi.where())
+    try:
+      for image_id in sys.argv[4:]:
+        # read image
+        img = Image.open(os.path.join(sys.argv[3],image_id[:3],image_id))
+        # detect faces
+        bboxes = mtfd.detect_face(img)
+        # get crops?
+        #crops = crop_face_with_margin(img, bounding_boxes)
+        # format faces bounding boxes
+        out_dict = {}
+        dict_bbox = {}
+        for i,bbox in enumerate(bounding_boxes):
+          face_id = one_row[0]+'_'+'-'.join([str(int(x)) for x in bbox[:4]])
+          dict_bbox[face_id] = {}
+          dict_bbox[face_id]['bbox'] = ','.join([str(x) for x in bbox[:4]])
+          dict_bbox[face_id]['score'] = str(bbox[4])
+        out_dict[args.column_detection] = json.dumps(dict_bbox)
+        print json.dumps(out_dict)
 
-        cdr_ids = sys.argv[1:]
-
-        try:
-	    # connection timeout gets printed out, from where?
-            results = search(json.dumps(cdr_ids), es)
-
-            for result in results:
-		out = json.dumps(result.to_dict())
-		if not out.startswith('ConnectionTimeout'):
-                	print(out)
-        except Exception as e:
-            print str(e)
-            sys.exit(5)
+    except Exception as e:
+      print str(e)
+      sys.exit(5)
