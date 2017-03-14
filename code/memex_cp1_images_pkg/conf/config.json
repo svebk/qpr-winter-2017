@@ -1,0 +1,8 @@
+{
+	"es_host": "cdr-es.istresearch.com",
+      	"es_port": 9200,
+	"es_index": "memex-domains",
+	"es_doc_type": "escorts",
+	"es_user": "cdr-memex",
+      	"es_pass": "5OaYUNBhjO68O7Pn"
+}

@@ -1,0 +1,8 @@
+{
+	"es_host": "es_host",
+      	"es_port": "es_port",
+	"es_index": "es_index",
+	"es_doc_type": "es_doc_type",
+	"es_user": "es_user",
+      	"es_pass": "es_pass"
+}
