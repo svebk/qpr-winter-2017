@@ -34,18 +34,19 @@ if __name__ == '__main__':
         # read image
         img = Image.open(os.path.join(sys.argv[3],image_id[:3],image_id))
         # detect faces
-        bboxes = mtfd.detect_face(img)
+        bboxes = mtfd.detect_faces(img)
+        #print bboxes
         # get crops?
         #crops = crop_face_with_margin(img, bounding_boxes)
         # format faces bounding boxes
         out_dict = {}
         dict_bbox = {}
-        for i,bbox in enumerate(bounding_boxes):
-          face_id = one_row[0]+'_'+'-'.join([str(int(x)) for x in bbox[:4]])
+        for i,bbox in enumerate(bboxes):
+          face_id = image_id+'_'+'-'.join([str(int(x)) for x in bbox[:4]])
           dict_bbox[face_id] = {}
           dict_bbox[face_id]['bbox'] = ','.join([str(x) for x in bbox[:4]])
           dict_bbox[face_id]['score'] = str(bbox[4])
-        out_dict[args.column_detection] = json.dumps(dict_bbox)
+        out_dict[image_id] = dict_bbox
         print json.dumps(out_dict)
 
     except Exception as e:
