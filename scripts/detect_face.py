@@ -39,10 +39,15 @@ if __name__ == '__main__':
   else:
     mtfd = init(facenet_root=sys.argv[1], data_dir=sys.argv[2])
 
-    try:
-      for image_id in sys.argv[4:]:
+
+    for image_id in sys.argv[4:]:
+      try:
         # read image
         img = Image.open(os.path.join(sys.argv[3],image_id[:3],image_id))
+        if len(img.size) == 2:
+          rgbimg = Image.new("RGB", img.size)
+          rgbimg.paste(img)
+          img = rgbimg
         # detect faces
         bboxes = mtfd.detect_faces(img)
         #print bboxes
@@ -58,7 +63,8 @@ if __name__ == '__main__':
           dict_bbox[face_id]['score'] = str(bbox[4])
         out_dict[image_id] = dict_bbox
         print json.dumps(out_dict)
-
-    except Exception as e:
-      print str(e)
-      sys.exit(5)
+      except Exception as e:
+        # axes don't match arrary?
+        pass
+        #print str(e)
+        #sys.exit(5)
