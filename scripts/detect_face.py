@@ -17,6 +17,16 @@ def init(facenet_root, data_dir):
   mtfd = MTCNNFaceDetector(conf)
   return mtfd
 
+# A common approach for blurriness detection is a thresholding of the variance on the laplacian filtered image
+# But how to get the threshold value? Compute statistics on LFW images with/without blur?
+# how should we deal with other faces obfuscation? painting, overlay
+def blurriness(img):
+  from PIL.ImageFilter import Kernel
+  from PIL.ImageStat import Stat
+  lap = Kernel((3,3), [0, 1, 0, 1, -4, 1, 0, 1,0 ])
+  img.copy().filter(lap)
+  img_stat = Stat(img)
+  return img_stat.var
 
 if __name__ == '__main__':
   """
