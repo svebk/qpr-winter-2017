@@ -24,6 +24,8 @@
 # In[1]:
 
 import os
+from subprocess import call
+
 #facesearch_dir = "ColumbiaFaceSearch"
 facesearch_dir = "facesearch"
 # set some path parameters
@@ -39,7 +41,11 @@ IMAGE_DIR = os.path.join(input_dir,prefix+'_images')
 
 # get just sha1 list
 IMAGE_SHA1S = os.path.join(input_dir,prefix+"_image_sha1_list.csv")
-get_ipython().system(u"cat $input_file | cut -d ',' -f2 | sort | uniq > $IMAGE_SHA1S")
+#get_ipython().system(u"cat $input_file | cut -d ',' -f2 | sort | uniq > $IMAGE_SHA1S")
+#call("cat {} | cut -d ',' -f2 | sort | uniq > {}".format(input_file, IMAGE_SHA1S))
+cmd = "cat {} | cut -d ',' -f2 | sort | uniq > {}".format(input_file, IMAGE_SHA1S)
+print cmd
+call(cmd, shell=True)
 
 DETECTED_FACES = os.path.join(input_dir,prefix+"_faces.jl")
 FACES_JOBLOG = prefix+"_faces.joblog"
@@ -48,7 +54,11 @@ FACES_JOBLOG = prefix+"_faces.joblog"
 # In[3]:
 
 # find faces in images of ads
-get_ipython().system(u'parallel --joblog $FACES_JOBLOG           --retries 0           --arg-file $IMAGE_SHA1S           --max-args 200           --jobs 2         python ../scripts/detect_face.py $FACENET_DIR $DATA_DIR $IMAGE_DIR > $DETECTED_FACES')
+#get_ipython().system(u'parallel --joblog $FACES_JOBLOG           --retries 0           --arg-file $IMAGE_SHA1S           --max-args 200           --jobs 2         python ../scripts/detect_face.py $FACENET_DIR $DATA_DIR $IMAGE_DIR > $DETECTED_FACES')
+#call('parallel --joblog $FACES_JOBLOG --retries 0 --arg-file $IMAGE_SHA1S --max-args 200 --jobs 30 python ../scripts/detect_face.py $FACENET_DIR $DATA_DIR $IMAGE_DIR > $DETECTED_FACES')
+cmd = 'parallel --joblog {} --retries 0 --arg-file {} --max-args 200 --jobs 30 python ../scripts/detect_face.py {} {} {} > {}'.format(FACES_JOBLOG, IMAGE_SHA1S, FACENET_DIR, DATA_DIR, IMAGE_DIR, DETECTED_FACES)
+print cmd
+call(cmd, shell=True)
 
 
 # In[ ]:
