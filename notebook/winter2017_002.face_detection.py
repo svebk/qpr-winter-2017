@@ -56,9 +56,10 @@ FACES_JOBLOG = prefix+"_faces.joblog"
 # find faces in images of ads
 #get_ipython().system(u'parallel --joblog $FACES_JOBLOG           --retries 0           --arg-file $IMAGE_SHA1S           --max-args 200           --jobs 2         python ../scripts/detect_face.py $FACENET_DIR $DATA_DIR $IMAGE_DIR > $DETECTED_FACES')
 #call('parallel --joblog $FACES_JOBLOG --retries 0 --arg-file $IMAGE_SHA1S --max-args 200 --jobs 30 python ../scripts/detect_face.py $FACENET_DIR $DATA_DIR $IMAGE_DIR > $DETECTED_FACES')
-cmd = 'parallel --joblog {} --retries 0 --arg-file {} --max-args 200 --jobs 30 python ../scripts/detect_face.py {} {} {} > {}'.format(FACES_JOBLOG, IMAGE_SHA1S, FACENET_DIR, DATA_DIR, IMAGE_DIR, DETECTED_FACES)
+set_env = 'source activate facesearch; parallel --record-env; '
+cmd = 'parallel --env _ --joblog {} --retries 0 --arg-file {} --max-args 100 --jobs 30 python ../scripts/detect_face.py {} {} {} > {}'.format(FACES_JOBLOG, IMAGE_SHA1S, FACENET_DIR, DATA_DIR, IMAGE_DIR, DETECTED_FACES)
 print cmd
-call(cmd, shell=True)
+call(set_env+cmd, shell=True, executable='/bin/bash')
 
 
 # In[ ]:
